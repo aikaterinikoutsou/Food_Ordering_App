@@ -1,0 +1,22 @@
+---
+id: b3671ef2-58ba-4a17-8be2-af0cfa2c65d1
+---
+sequenceDiagram
+   
+    participant Customer
+    participant WebApp
+    participant MenuService 
+    participant DB
+
+    Customer->>WebApp: Request restaurant menu
+    WebApp->>MenuService: GET menu data /restaurant[id]/menu
+    MenuService->>DB: Query menu data for restaurant[id]
+    DB-->>MenuService: Return menu data
+
+    alt Restaurant open
+        MenuService-->>WebApp: 200 OK, menu[items enabled]
+        WebApp-->>Customer: Display menu data, items addable to cart
+    else Restaurant closed
+        MenuService-->>WebApp: 200 OK,menu[items disabled]
+        WebApp-->>Customer: Display menu data, items not addable to cart
+    end
