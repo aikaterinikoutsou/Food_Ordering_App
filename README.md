@@ -60,11 +60,25 @@ Run the unit tests with pytest:
 python -m pytest
 ```
 
-Gherkin feature specifications are in `validation/features`. To run the Behave suite:
+Gherkin scenarios and their Behave step definitions are in `validation/features`. Scenarios are tagged by their current status:
+
+- `@passing`: behavior currently supported by the application.
+- `@failing`: implemented paths that do not yet meet the specified behavior.
+- `@blocked`: behavior not yet implemented; these scenarios are skipped with a reason.
+
+Run only the currently passing scenarios with:
+
+```powershell
+behave --tags=@passing
+```
+
+Run the complete suite to see passing, known failing, and skipped/blocked scenarios:
 
 ```powershell
 behave
 ```
+
+The full run exits with a failure status while any `@failing` scenarios remain.
 
 ## Project structure
 
