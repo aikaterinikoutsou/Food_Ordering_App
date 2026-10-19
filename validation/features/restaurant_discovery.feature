@@ -7,7 +7,7 @@ Feature: Restaurant discovery
   Background:
     Given the customer has opened the app
 
-  @TC-001 @passing @positive @high
+  @TC-001 @positive @high
   Scenario: Search returns nearby restaurants
     Given the customer has granted location permissions
     And the demo restaurants are available
@@ -15,21 +15,21 @@ Feature: Restaurant discovery
     Then the results list shows restaurants sorted by distance
     And each result has a name, rating, and estimated delivery time
 
-  @TC-002 @blocked @edge @medium
+  @TC-002 @edge @medium
   Scenario: Search with no results nearby
     Given no restaurants are within 50km of the customer location
     When the customer performs a search
     Then an empty-state message "No restaurants found nearby" is shown
     And no error or blank screen is displayed
 
-  @TC-003 @blocked @negative @high
+  @TC-003 @negative @high
   Scenario: Search with location services disabled
     Given the customer has denied location permission
     When the customer attempts a search
     Then the app prompts for a manual address or to enable location
     And the app does not crash
 
-  @TC-004 @passing @positive @medium
+  @TC-004 @positive @medium
   Scenario: Filter restaurants by cuisine type
     Given search results include at least 2 cuisine types
     When the customer applies the "Italian" filter

@@ -60,25 +60,13 @@ Run the unit tests with pytest:
 python -m pytest
 ```
 
-Gherkin scenarios and their Behave step definitions are in `validation/features`. Scenarios are tagged by their current status:
-
-- `@passing`: behavior currently supported by the application.
-- `@failing`: implemented paths that do not yet meet the specified behavior.
-- `@blocked`: behavior not yet implemented; these scenarios are skipped with a reason.
-
-Run only the currently passing scenarios with:
+Gherkin scenarios and their Behave step definitions are in `validation/features`. Run the suite to see the actual results for the current code:
 
 ```powershell
-behave --tags=@passing
+python -m behave --format pretty
 ```
 
-Run the complete suite to see passing, known failing, and skipped/blocked scenarios:
-
-```powershell
-behave
-```
-
-The full run exits with a failure status while any `@failing` scenarios remain.
+Behave reports scenario failures from failed assertions or errors in step definitions. Scenarios with undefined steps are reported as undefined/errors, and their remaining steps are skipped; they are not pre-labeled or automatically skipped as blocked.
 
 ## Project structure
 
