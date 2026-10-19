@@ -1,262 +1,47 @@
 @FEAT-003
-Feature: Cart management # test/validation_tests/features/cart_management.feature:2
+Feature: Cart management # validation/features/cart_management.feature:2
   As a customer
   I want to add, remove, and adjust items in my cart
   So that I can manage my order before checkout
   @TC-009 @US-005 @positive @high
-  Scenario: Add an available item to the cart              # test/validation_tests/features/cart_management.feature:8
-    Given the meal "Salmon Roll" is available              # test/validation_tests/features/steps/cart_management_steps.py:76
-    When the customer taps "Add to cart" on "Salmon Roll"  # test/validation_tests/features/steps/cart_management_steps.py:88
-    Then "Salmon Roll" appears in the cart with quantity 1 # test/validation_tests/features/steps/cart_management_steps.py:93
-    And the cart total is updated to include it            # test/validation_tests/features/steps/cart_management_steps.py:98
+  Scenario: Add an available item to the cart              # validation/features/cart_management.feature:8
+    Given the meal "Salmon Roll" is available              # validation/features/steps/application_steps.py:41
+    When the customer taps "Add to cart" on "Salmon Roll"  # validation/features/steps/application_steps.py:57
+    Then "Salmon Roll" appears in the cart with quantity 1 # validation/features/steps/application_steps.py:71
+    And the cart total is updated to include it            # validation/features/steps/application_steps.py:76
 
   @TC-010 @US-005 @negative @high
-  Scenario: Attempt to add an unavailable item                       # test/validation_tests/features/cart_management.feature:15
-    Given the meal "Salmon Roll" is marked unavailable               # test/validation_tests/features/steps/cart_management_steps.py:82
-    When the customer attempts to add "Salmon Roll" to the cart      # test/validation_tests/features/steps/cart_management_steps.py:106
-    Then the item is not added to the cart                           # test/validation_tests/features/steps/cart_management_steps.py:111
-    And the customer sees a message that it is currently unavailable # test/validation_tests/features/steps/cart_management_steps.py:116
+  Scenario: Attempt to add an unavailable item                       # validation/features/cart_management.feature:15
+    Given the meal "Salmon Roll" is marked unavailable               # validation/features/steps/application_steps.py:51
+    When the customer attempts to add "Salmon Roll" to the cart      # validation/features/steps/application_steps.py:63
+    Then the item is not added to the cart                           # validation/features/steps/application_steps.py:82
+    And the customer sees a message that it is currently unavailable # validation/features/steps/application_steps.py:87
 
   @TC-011 @US-007 @positive @medium
-  Scenario: Increase and decrease item quantity                        # test/validation_tests/features/cart_management.feature:22
-    Given "Salmon Roll" is already in the cart with quantity 1         # test/validation_tests/features/steps/cart_management_steps.py:121
-    When the customer increases the quantity by 2                      # test/validation_tests/features/steps/cart_management_steps.py:129
-    And the customer decreases the quantity by 1                       # test/validation_tests/features/steps/cart_management_steps.py:135
-    Then the cart shows "Salmon Roll" with quantity 2                  # test/validation_tests/features/steps/cart_management_steps.py:141
-    And the cart total is recalculated automatically after each change # test/validation_tests/features/steps/cart_management_steps.py:146
+  Scenario: Increase and decrease item quantity                        # validation/features/cart_management.feature:22
+    Given "Salmon Roll" is already in the cart with quantity 1         # validation/features/steps/application_steps.py:92
+    When the customer increases the quantity by 2                      # validation/features/steps/application_steps.py:100
+    And the customer decreases the quantity by 1                       # validation/features/steps/application_steps.py:108
+    Then the cart shows "Salmon Roll" with quantity 2                  # validation/features/steps/application_steps.py:116
+    And the cart total is recalculated automatically after each change # validation/features/steps/application_steps.py:121
 
   @TC-012 @US-006 @edge @medium
-  Scenario: Decrease quantity to zero removes the item               # test/validation_tests/features/cart_management.feature:30
-    Given "Salmon Roll" is the only item in the cart with quantity 1 # test/validation_tests/features/steps/cart_management_steps.py:154
-    When the customer decreases the quantity to 0                    # test/validation_tests/features/steps/cart_management_steps.py:162
-    Then "Salmon Roll" is removed from the cart entirely             # test/validation_tests/features/steps/cart_management_steps.py:168
-    And the cart total updates to zero                               # test/validation_tests/features/steps/cart_management_steps.py:173
-    And an empty-cart message is shown                               # test/validation_tests/features/steps/cart_management_steps.py:178
+  Scenario: Decrease quantity to zero removes the item               # validation/features/cart_management.feature:30
+    Given "Salmon Roll" is the only item in the cart with quantity 1 # validation/features/steps/application_steps.py:129
+    When the customer decreases the quantity to 0                    # validation/features/steps/application_steps.py:134
+    Then "Salmon Roll" is removed from the cart entirely             # validation/features/steps/application_steps.py:139
+    And the cart total updates to zero                               # validation/features/steps/application_steps.py:144
 
   @TC-013 @US-005 @positive @high
-  Scenario: Cart persists after a page reload                               # test/validation_tests/features/cart_management.feature:38
-    Given the customer has added an item to the cart in the current session # test/validation_tests/features/steps/cart_management_steps.py:184
-    When the customer reloads the page                                      # test/validation_tests/features/steps/cart_management_steps.py:192
-    Then the cart still shows the same items and quantities                 # test/validation_tests/features/steps/cart_management_steps.py:198
+  Scenario: Cart persists after a page reload                               # validation/features/cart_management.feature:37
+    Given the customer has added an item to the cart in the current session # None
+    When the customer reloads the page                                      # None
+    Then the cart still shows the same items and quantities                 # None
 
   @TC-014 @negative @high
-  Scenario: Mix items from two different restaurants                           # test/validation_tests/features/cart_management.feature:44
-    Given the cart contains an item from "Sushi Place"                         # test/validation_tests/features/steps/cart_management_steps.py:203
-    When the customer attempts to add an item from "Pizza Corner"              # test/validation_tests/features/steps/cart_management_steps.py:211
-    Then the app blocks the action                                             # test/validation_tests/features/steps/cart_management_steps.py:218
-    And the customer is prompted to start a new cart, clearing the current one # test/validation_tests/features/steps/cart_management_steps.py:223
-
-@FEAT-004
-Feature: Checkout # test/validation_tests/features/checkout.feature:2
-  As a customer
-  I want to review my order and enter delivery details
-  So that I can confirm my order before paying
-  @TC-015 @positive @high
-  Scenario: Proceed to checkout with a valid cart           # test/validation_tests/features/checkout.feature:8
-    Given the cart contains at least 1 available item       # None
-    When the customer taps "Checkout"                       # None
-    Then the order summary shows an itemized list           # None
-    And the subtotal, delivery fee, and total are displayed # None
-
-  @TC-016 @negative @medium
-  Scenario: Checkout with an empty cart                         # test/validation_tests/features/checkout.feature:15
-    Given the cart is empty                                     # None
-    When the customer navigates directly to the checkout screen # None
-    Then the customer is redirected back to the menu or cart    # None
-    And checkout is not accessible                              # None
-
-  @TC-017 @positive @high
-  Scenario: Enter a valid delivery address                # test/validation_tests/features/checkout.feature:22
-    Given the customer is on the checkout screen          # None
-    When the customer enters a valid address and confirms # None
-    Then the address is validated for correct format      # None
-    And the address is saved for this order               # None
-
-  @TC-018 @negative @high
-  Scenario: Enter an address outside the delivery zone  # test/validation_tests/features/checkout.feature:29
-    Given the restaurant's delivery radius is 5km       # None
-    When the customer enters an address 10km away       # None
-    Then checkout is blocked                            # None
-    And the message "Outside delivery area" is shown    # None
-
-  @TC-019 @edge @high
-  Scenario: Item becomes unavailable mid-checkout                      # test/validation_tests/features/checkout.feature:36
-    Given the customer has reached the checkout screen                 # None
-    When an item in the cart is marked unavailable by the backend      # None
-    And the customer attempts to confirm the order                     # None
-    Then the customer is notified before payment                       # None
-    And the customer must remove or replace the item before proceeding # None
-
-@FEAT-007
-Feature: Delivery tracking # test/validation_tests/features/delivery_tracking.feature:2
-  As a customer
-  I want to track my order
-  So that I know when it will arrive
-  @TC-028 @positive @high
-  Scenario: View live order status                                                # test/validation_tests/features/delivery_tracking.feature:8
-    Given the order has been confirmed and accepted by the restaurant             # None
-    When the customer opens "Track order"                                         # None
-    Then the status progresses through Preparing, Out for delivery, and Delivered # None
-    And updates are reflected in real time                                        # None
-
-  @TC-029 @positive @medium
-  Scenario: Track an order after an app restart                   # test/validation_tests/features/delivery_tracking.feature:15
-    Given an active order exists for the customer                 # None
-    When the customer closes and reopens the app                  # None
-    Then the tracking screen reloads the current status correctly # None
-    And the status is not a stale or cached value                 # None
-
-  @TC-030 @edge @low
-  Scenario: Tracking when courier location is temporarily unavailable  # test/validation_tests/features/delivery_tracking.feature:22
-    Given the courier's GPS signal is lost temporarily                 # None
-    When the customer views the tracking screen                        # None
-    Then the app shows the last known location with a timestamp        # None
-    And the map does not break or the app does not crash               # None
-
-  @TC-031 @negative @medium
-  Scenario: Order marked delivered without being tracked live  # test/validation_tests/features/delivery_tracking.feature:29
-    Given the backend marks the order as "delivered" directly  # None
-    When the customer views the tracking screen                # None
-    Then the status updates correctly to "Delivered"           # None
-    And the UI does not get stuck on an earlier stage          # None
-
-@FEAT-002
-Feature: Menu browsing # test/validation_tests/features/menu_browsing.feature:2
-  As a customer
-  I want to view a restaurant's menu
-  So that I can select food to order
-  @TC-005 @positive @high
-  Scenario: View full menu for a restaurant                                # test/validation_tests/features/menu_browsing.feature:8
-    Given the restaurant "Sushi Place" has an active menu with categories  # None
-    When the customer selects "Sushi Place" from the results               # None
-    Then the menu loads showing categories, item names, prices, and images # None
-
-  @TC-006 @edge @medium
-  Scenario: View menu for a currently closed restaurant  # test/validation_tests/features/menu_browsing.feature:14
-    Given a restaurant is outside its operating hours    # None
-    When the customer selects that restaurant            # None
-    Then the menu is viewable in browse-only mode        # None
-    And items are marked unavailable                     # None
-    And "Add to cart" is not allowed on any item         # None
-
-  @TC-007 @negative @high
-  Scenario: Menu fails to load due to a backend timeout          # test/validation_tests/features/menu_browsing.feature:22
-    Given the menu service is unreachable                        # None
-    When the customer selects a restaurant                       # None
-    Then the app shows a clear error message with a retry option # None
-    And the app does not hang indefinitely                       # None
-
-  @TC-008 @positive @low
-  Scenario: View item details with allergen info            # test/validation_tests/features/menu_browsing.feature:29
-    Given the item "Salmon Roll" has allergen metadata set  # None
-    When the customer taps on "Salmon Roll"                 # None
-    Then the detail view shows the description and price    # None
-    And allergen tags such as "contains fish" are displayed # None
-
-@FEAT-006
-Feature: Order confirmation # test/validation_tests/features/order_confirmation.feature:2
-  As a customer
-  I want to receive confirmation of my order
-  So that I know my order was accepted
-  @TC-025 @positive @high
-  Scenario: Confirmation shown after successful payment                 # test/validation_tests/features/order_confirmation.feature:8
-    Given the customer's payment has just succeeded                     # None
-    When the customer views the post-payment screen                     # None
-    Then a confirmation screen shows the order number, items, and total # None
-    And an estimated delivery time is displayed                         # None
-
-  @TC-026 @positive @medium
-  Scenario: Confirmation notification is sent                            # test/validation_tests/features/order_confirmation.feature:15
-    Given the order has been successfully placed                         # None
-    When up to 2 minutes have passed                                     # None
-    Then the customer receives a confirmation email or push notification # None
-
-  @TC-027 @edge @medium
-  Scenario: Restaurant does not acknowledge the order in time             # test/validation_tests/features/order_confirmation.feature:21
-    Given the restaurant has not accepted the order within the SLA window # None
-    When the SLA window elapses                                           # None
-    Then the customer is notified of the delay                            # None
-    And a support or cancellation option is surfaced                      # None
-
-@FEAT-005
-Feature: Payment # test/validation_tests/features/payment.feature:2
-  As a customer
-  I want to pay for my order
-  So that I can complete my purchase
-  @TC-020 @positive @high
-  Scenario: Pay successfully with a valid card                              # test/validation_tests/features/payment.feature:8
-    Given the customer has entered valid card details with sufficient funds # None
-    When the customer submits the payment                                   # None
-    Then the payment is authorized                                          # None
-    And the order moves to the "confirmed" state                            # None
-
-  @TC-021 @negative @high
-  Scenario: Payment declined due to insufficient funds     # test/validation_tests/features/payment.feature:15
-    Given the customer's card has insufficient funds       # None
-    When the customer submits the payment                  # None
-    Then the order is not created                          # None
-    And the customer sees the decline reason               # None
-    And the customer can retry with another payment method # None
-
-  @TC-022 @negative @high
-  Scenario: Payment gateway timeout                                          # test/validation_tests/features/payment.feature:23
-    Given the payment provider is simulating a timeout                       # None
-    When the customer submits the payment                                    # None
-    Then the system does not double-charge the customer on retry             # None
-    And the customer sees a "checking payment status" message until resolved # None
-
-  @TC-023 @negative @medium
-  Scenario: Invalid card number format                # test/validation_tests/features/payment.feature:30
-    When the customer enters a malformed card number  # None
-    And the customer submits the payment form         # None
-    Then client-side validation blocks submission     # None
-    And the request never reaches the payment gateway # None
-
-  @TC-024 @edge @high
-  Scenario: Duplicate submission from double-clicking Pay                  # test/validation_tests/features/payment.feature:37
-    Given the customer is on the payment screen with valid details entered # None
-    When the customer clicks "Pay" twice in quick succession               # None
-    Then only one charge is created                                        # None
-    And the second click is debounced or ignored                           # None
-
-@FEAT-001
-Feature: Restaurant discovery # test/validation_tests/features/restaurant_discovery.feature:2
-  As a customer
-  I want to search for nearby restaurants
-  So that I can choose where to order from
-  @FEAT-001
-  Feature: Restaurant discovery  # test/validation_tests/features/restaurant_discovery.feature:2
-
-  @TC-001 @positive @high
-  Scenario: Search returns nearby restaurants                         # test/validation_tests/features/restaurant_discovery.feature:11
-    Given the customer has opened the app                             # None
-    Given the customer has granted location permissions               # None
-    And at least 3 restaurants are within 5km of the customer         # None
-    When the customer performs a search with the default location     # None
-    Then the results list shows restaurants sorted by distance        # None
-    And each result shows a name, rating, and estimated delivery time # None
-
-  @TC-002 @edge @medium
-  Scenario: Search with no results nearby                              # test/validation_tests/features/restaurant_discovery.feature:19
-    Given the customer has opened the app                              # None
-    Given no restaurants are within 50km of the customer location      # None
-    When the customer performs a search                                # None
-    Then an empty-state message "No restaurants found nearby" is shown # None
-    And no error or blank screen is displayed                          # None
-
-  @TC-003 @negative @high
-  Scenario: Search with location services disabled                  # test/validation_tests/features/restaurant_discovery.feature:26
-    Given the customer has opened the app                           # None
-    Given the customer has denied location permission               # None
-    When the customer attempts a search                             # None
-    Then the app prompts for a manual address or to enable location # None
-    And the app does not crash                                      # None
-
-  @TC-004 @positive @medium
-  Scenario: Filter restaurants by cuisine type                     # test/validation_tests/features/restaurant_discovery.feature:33
-    Given the customer has opened the app                          # None
-    Given search results include at least 2 cuisine types          # None
-    When the customer applies the "Italian" filter                 # None
-    Then only restaurants tagged "Italian" are shown               # None
-    And the customer can clear the filter to see all results again # None
+  Scenario: Reject an item from a different restaurant without changing the cart  # validation/features/cart_management.feature:43
+    Given the cart contains an item from "Sushi Place"                            # validation/features/steps/application_steps.py:149
+    When the customer attempts to add an item from "Pizza Corner"                 # validation/features/steps/application_steps.py:158
+    Then the app blocks the action                                                # validation/features/steps/application_steps.py:169
+    And the existing cart remains unchanged                                       # validation/features/steps/application_steps.py:175
 
