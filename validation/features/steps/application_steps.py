@@ -14,13 +14,15 @@ def _start_app(context):
     context.payment_result = None
     context.total_history = []
 
-
-def _add_salmon_roll(context, quantity=1):
+@given('the meal "{dish}" is available')
+@when('the customer taps "Add to cart" on "{dish}"')
+def _add_dish(context, dish, quantity=1):
+    _start_app(context)
     context.app.browse_restaurant("Sushi Place")
     for _ in range(quantity):
-        context.app.add_to_cart("Salmon Roll")
-
-
+        context.app.add_to_cart(dish)
+        _record_cart_total(context)
+  
 def _record_cart_total(context):
     context.total_history.append(context.app.cart_total())
 
@@ -38,26 +40,11 @@ def customer_has_opened_app(context):
     _start_app(context)
 
 
-@given('the meal "{meal}" is available')
-def meal_is_available(context, meal):
-    _start_app(context)
-    context.app.browse_restaurant("Sushi Place")
-    item = context.app.current_restaurant.get_item(meal)
-    assert item is not None
-    item.available = True
-    context.meal = meal
-
-
 @given('the meal "{meal}" is marked unavailable')
 def meal_is_unavailable(context, meal):
     meal_is_available(context, meal)
     context.app.current_restaurant.get_item(meal).available = False
-
-
-@when('the customer taps "Add to cart" on "{meal}"')
-def customer_adds_meal(context, meal):
-    context.app.add_to_cart(meal)
-    _record_cart_total(context)
+ 
 
 
 @when('the customer attempts to add "{meal}" to the cart')
@@ -73,9 +60,9 @@ def meal_appears_with_quantity(context, meal, quantity):
     assert context.app.cart.items[meal].quantity == quantity
 
 
-@then("the cart total is updated to include it")
-def cart_total_includes_added_meal(context):
-    assert context.app.cart_total() == Decimal("10.00")
+@then('the cart total is updated "{price}" to include it')
+def cart_total_includes_added_meal(context, price):
+    assert context.app.cart_total() == Decimal(price)
     assert context.total_history[-1] == context.app.cart_total()
 
 

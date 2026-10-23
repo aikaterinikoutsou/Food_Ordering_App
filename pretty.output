@@ -4,44 +4,9 @@ Feature: Cart management # validation/features/cart_management.feature:2
   I want to add, remove, and adjust items in my cart
   So that I can manage my order before checkout
   @TC-009 @US-005 @positive @high
-  Scenario: Add an available item to the cart              # validation/features/cart_management.feature:8
-    Given the meal "Salmon Roll" is available              # validation/features/steps/application_steps.py:41
-    When the customer taps "Add to cart" on "Salmon Roll"  # validation/features/steps/application_steps.py:57
-    Then "Salmon Roll" appears in the cart with quantity 1 # validation/features/steps/application_steps.py:71
-    And the cart total is updated to include it            # validation/features/steps/application_steps.py:76
-
-  @TC-010 @US-005 @negative @high
-  Scenario: Attempt to add an unavailable item                       # validation/features/cart_management.feature:15
-    Given the meal "Salmon Roll" is marked unavailable               # validation/features/steps/application_steps.py:51
-    When the customer attempts to add "Salmon Roll" to the cart      # validation/features/steps/application_steps.py:63
-    Then the item is not added to the cart                           # validation/features/steps/application_steps.py:82
-    And the customer sees a message that it is currently unavailable # validation/features/steps/application_steps.py:87
-
-  @TC-011 @US-007 @positive @medium
-  Scenario: Increase and decrease item quantity                        # validation/features/cart_management.feature:22
-    Given "Salmon Roll" is already in the cart with quantity 1         # validation/features/steps/application_steps.py:92
-    When the customer increases the quantity by 2                      # validation/features/steps/application_steps.py:100
-    And the customer decreases the quantity by 1                       # validation/features/steps/application_steps.py:108
-    Then the cart shows "Salmon Roll" with quantity 2                  # validation/features/steps/application_steps.py:116
-    And the cart total is recalculated automatically after each change # validation/features/steps/application_steps.py:121
-
-  @TC-012 @US-006 @edge @medium
-  Scenario: Decrease quantity to zero removes the item               # validation/features/cart_management.feature:30
-    Given "Salmon Roll" is the only item in the cart with quantity 1 # validation/features/steps/application_steps.py:129
-    When the customer decreases the quantity to 0                    # validation/features/steps/application_steps.py:134
-    Then "Salmon Roll" is removed from the cart entirely             # validation/features/steps/application_steps.py:139
-    And the cart total updates to zero                               # validation/features/steps/application_steps.py:144
-
-  @TC-013 @US-005 @positive @high
-  Scenario: Cart persists after a page reload                               # validation/features/cart_management.feature:37
-    Given the customer has added an item to the cart in the current session # None
-    When the customer reloads the page                                      # None
-    Then the cart still shows the same items and quantities                 # None
-
-  @TC-014 @negative @high
-  Scenario: Reject an item from a different restaurant without changing the cart  # validation/features/cart_management.feature:43
-    Given the cart contains an item from "Sushi Place"                            # validation/features/steps/application_steps.py:149
-    When the customer attempts to add an item from "Pizza Corner"                 # validation/features/steps/application_steps.py:158
-    Then the app blocks the action                                                # validation/features/steps/application_steps.py:169
-    And the existing cart remains unchanged                                       # validation/features/steps/application_steps.py:175
+  Scenario: Add a dish to the cart                         # validation/features/cart_management.feature:8
+    Given the meal "Salmon Roll" is available              # validation/features/steps/application_steps.py:17
+    When the customer taps "Add to cart" on "Salmon Roll"  # validation/features/steps/application_steps.py:17
+    Then "Salmon Roll" appears in the cart with quantity 1 # validation/features/steps/application_steps.py:58
+    And the cart total is updated "10.00" to include it    # validation/features/steps/application_steps.py:63
 

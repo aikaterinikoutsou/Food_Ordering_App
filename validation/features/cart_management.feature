@@ -5,11 +5,11 @@ Feature: Cart management
   So that I can manage my order before checkout
 
   @TC-009 @US-005 @positive @high
-  Scenario: Add an available item to the cart
+  Scenario: Add a dish to the cart
     Given the meal "Salmon Roll" is available
     When the customer taps "Add to cart" on "Salmon Roll"
     Then "Salmon Roll" appears in the cart with quantity 1
-    And the cart total is updated to include it
+    And the cart total is updated "10.00" to include it
 
   @TC-010 @US-005 @negative @high
   Scenario: Attempt to add an unavailable item
