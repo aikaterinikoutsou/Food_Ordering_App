@@ -14,25 +14,27 @@ def _start_app(context):
     context.payment_result = None
     context.total_history = []
 
+
 @given('the meal "{dish}" is available')
 @when('the customer taps "Add to cart" on "{dish}"')
 def _add_dish(context, dish, quantity=1):
     _start_app(context)
+    context.meal = dish
     context.app.browse_restaurant("Sushi Place")
     for _ in range(quantity):
         context.app.add_to_cart(dish)
         _record_cart_total(context)
-  
+
+
 def _record_cart_total(context):
     context.total_history.append(context.app.cart_total())
 
 
 def _create_order(context):
     _start_app(context)
-    _add_salmon_roll(context)
-    context.order = context.app.checkout(
-        Address("Main Street 12", "Madrid", "28001")
-    )
+    context.app.browse_restaurant("Sushi Place")
+    context.app.add_to_cart("Salmon Roll")
+    context.order = context.app.checkout(Address("Main Street 12", "Madrid", "28001"))
 
 
 @given("the customer has opened the app")
@@ -42,9 +44,10 @@ def customer_has_opened_app(context):
 
 @given('the meal "{meal}" is marked unavailable')
 def meal_is_unavailable(context, meal):
-    meal_is_available(context, meal)
+    _start_app(context)
+    context.meal = meal
+    context.app.browse_restaurant("Sushi Place")
     context.app.current_restaurant.get_item(meal).available = False
- 
 
 
 @when('the customer attempts to add "{meal}" to the cart')
@@ -78,7 +81,9 @@ def unavailable_message_is_shown(context):
 
 @given('"{meal}" is already in the cart with quantity {quantity:d}')
 def meal_is_already_in_cart(context, meal, quantity):
-    meal_is_available(context, meal)
+    _start_app(context)
+    context.meal = meal
+    context.app.browse_restaurant("Sushi Place")
     context.app.add_to_cart(meal)
     context.app.update_cart_quantity(meal, quantity)
     _record_cart_total(context)
@@ -204,15 +209,15 @@ def results_include_multiple_cuisines(context):
 
 @when('the customer applies the "{cuisine}" filter')
 def customer_filters_cuisine(context, cuisine):
-    context.results = context.app.search_restaurants(
-        40.4168, -3.7038, cuisine=cuisine
-    )
+    context.results = context.app.search_restaurants(40.4168, -3.7038, cuisine=cuisine)
 
 
 @then('only restaurants tagged "{cuisine}" are shown')
 def only_filtered_cuisine_is_shown(context, cuisine):
     assert context.results
-    assert all(restaurant.cuisine.lower() == cuisine.lower() for restaurant in context.results)
+    assert all(
+        restaurant.cuisine.lower() == cuisine.lower() for restaurant in context.results
+    )
 
 
 @when("the customer clears the filter")
@@ -228,14 +233,15 @@ def all_restaurants_are_shown_again(context):
 @given("the cart contains at least 1 available item")
 def cart_contains_available_item(context):
     _start_app(context)
-    _add_salmon_roll(context)
+    context.meal = "Salmon Roll"
+    context.app.browse_restaurant("Sushi Place")
+    context.app.add_to_cart(context.meal)
+    _record_cart_total(context)
 
 
 @when('the customer taps "Checkout"')
 def customer_taps_checkout(context):
-    context.order = context.app.checkout(
-        Address("Main Street 12", "Madrid", "28001")
-    )
+    context.order = context.app.checkout(Address("Main Street 12", "Madrid", "28001"))
 
 
 @then("the order summary shows an itemized list")
@@ -296,7 +302,12 @@ def restaurant_delivery_radius_is_five_km(context):
 
 @when("the customer enters an address 10km away")
 def customer_enters_distant_address(context):
-    context.address = Address("10km away", "Madrid", "28001")
+    context.address = Address(
+        "10km away",
+        "Madrid",
+        "28001",
+        distance_from_restaurant_km=10,
+    )
     try:
         context.order = context.app.checkout(context.address)
     except ValueError as error:
@@ -322,7 +333,7 @@ def customer_has_valid_card(context):
 @given("the customer's card has insufficient funds")
 def customer_card_has_insufficient_funds(context):
     _create_order(context)
-    context.card_number = "4111111111111111"
+    context.card_number = "4000000000000002"
 
 
 @when("the customer submits the payment")
@@ -459,9 +470,8 @@ def backend_marks_order_delivered(context):
 
 @when("the customer views the tracking screen")
 def customer_views_tracking(context):
-    context.current_tracking_status = context.app.tracker.current_status(
-        context.order
-    )
+    context.current_tracking_status = context.app.tracker.current_status(context.order)
+    context.tracking_details = context.app.tracking_details(context.order)
 
 
 @then('the current order status is "Delivered"')

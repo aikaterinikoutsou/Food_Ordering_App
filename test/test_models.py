@@ -10,7 +10,11 @@ from src.models import (
     Order,
     Restaurant,
 )
-from src.services import LocationPermissionError, RestaurantCatalog, RestaurantNotFoundError
+from src.services import (
+    LocationPermissionError,
+    RestaurantCatalog,
+    RestaurantNotFoundError,
+)
 
 
 def make_item(

@@ -30,11 +30,10 @@ features.
 
 ## Feature coverage notes
 
-- The current classes support selecting a restaurant and retrieving its categorized
-  menu items and item details.
-- The closed-restaurant scenario needs menu items to become unavailable when the
-  restaurant is closed. `Restaurant.is_menu_viewable()` currently always returns
-  `True`, and no current logic connects `is_open` to item availability.
-- Backend timeout handling and a retry option are not represented in the current
-  menu-browsing classes and would require a menu-loading boundary that can report
-  and retry failures.
+- `FoodOrderingApp.load_menu()` retrieves the categorized menu, and
+  `get_menu_item_details()` provides descriptions, prices, and allergen data.
+- Closed restaurants remain browsable, but `Restaurant.menu_for_browsing()`
+  returns unavailable item views and the app blocks adding those items.
+- Menu loading reports a retryable error when the menu service is unavailable;
+  `FoodOrderingApp.retry_menu()` retries the operation.
+- The menu service is simulated locally; no external menu backend is connected.

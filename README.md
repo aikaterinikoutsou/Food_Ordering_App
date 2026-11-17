@@ -1,15 +1,17 @@
 # Food Ordering App
 
-A Python project that models the main steps of a food-ordering workflow: finding restaurants, browsing menus, managing a cart, checking out, submitting payment, and tracking an order. The current app is a command-line demonstration of the domain logic rather than a web or mobile interface.
+A Python command-line food-ordering app that supports finding restaurants, browsing menus, managing a cart, checking out, simulating payment, receiving order updates, and tracking orders.
 
 ## Features
 
 - Search restaurants by cuisine and list results by distance.
-- Browse a restaurant menu and add available items to a single-restaurant cart.
+- Browse categorized menus, view item details and allergens, and prevent ordering unavailable items.
+- Save and restore carts and orders across app restarts.
 - Update item quantities and calculate the cart subtotal.
-- Create an order with an itemized subtotal, delivery fee, and total.
-- Simulate payment approval, invalid card numbers, and duplicate submissions.
-- Return delivery progress statuses for an order.
+- Validate checkout items and delivery addresses against a restaurant's delivery radius.
+- Create itemized orders with subtotal, delivery fee, and total.
+- Simulate approved, declined, timed-out, and duplicate payments with idempotent retries.
+- Track order status, provide a last-known courier location when GPS is unavailable, and surface restaurant-delay options.
 - Seeded demo restaurants and menu items for trying the workflow.
 
 ## Requirements
@@ -17,7 +19,8 @@ A Python project that models the main steps of a food-ordering workflow: finding
 - Python 3.12 or newer
 - `pip`
 
-The project dependencies are listed in [`requirements.txt`](requirements.txt).
+The project dependencies, including the Ruff formatter and linter, are listed in
+[`requirements.txt`](requirements.txt).
 
 ## Setup
 
@@ -42,7 +45,7 @@ If the `py` launcher is unavailable, use an installed Python executable to creat
 python -m venv .venv
 ```
 
-## Run the demo
+## Run the app
 
 Run from the project directory so Python can resolve the `src` package:
 
@@ -50,7 +53,9 @@ Run from the project directory so Python can resolve the `src` package:
 python -m src.app
 ```
 
-The demo seeds Sushi Place and Pizza Corner, searches for restaurants, adds a menu item to the cart, creates an order, submits a simulated payment, and prints delivery statuses.
+The app offers an interactive terminal menu for searching demo restaurants, browsing and adding menu items, checking the cart, completing checkout, and tracking the latest order. Session data is saved under `~/.food_ordering_app/session.json` when you exit, and restored the next time you run the app.
+
+The payment gateway is simulated. The demo card `4111111111111111` is approved, while a card number ending in `0002` simulates insufficient funds. No actual payment is processed.
 
 ## Run tests
 
@@ -60,27 +65,38 @@ Run the unit tests with pytest:
 python -m pytest
 ```
 
-Gherkin scenarios and their Behave step definitions are in `validation/features`. Run the suite to see the actual results for the current code:
+Check and format Python code with Ruff:
+
+```powershell
+python -m ruff check .
+python -m ruff format --check .
+```
+
+Gherkin scenarios and their Behave step definitions are in `validation/features`. Run all seven feature suites with:
 
 ```powershell
 python -m behave --format pretty
 ```
 
-Behave reports scenario failures from failed assertions or errors in step definitions. Scenarios with undefined steps are reported as undefined/errors, and their remaining steps are skipped; they are not pre-labeled or automatically skipped as blocked.
+The Behave suite covers restaurant discovery, menu browsing, cart management, checkout, payment, order confirmation, and delivery tracking.
 
 ## Project structure
 
 ```text
 src/
-  app.py          Application workflow and demo entry point
+  app.py          Compatibility exports and application entry point
+  application.py  Application workflow orchestration
+  cli.py          Interactive terminal interface
+  demo_data.py    Seeded restaurants and menu data
   models.py       Address, restaurant, menu, cart, payment, and order models
+  session_store.py JSON session persistence
   services.py     Restaurant catalog, checkout, payment, and delivery services
-test/             Pytest unit tests
+test/             Pytest unit and functional tests
 validation/
-  features/       Gherkin behavior specifications
+  features/       Gherkin specifications and Behave step implementations
 docs/             Architecture diagrams
 ```
 
 ## Current scope
 
-This is a learning/demo application: data is held in memory, payment is simulated, and there is no user interface or external payment provider. Delivery-address validation and delivery tracking are simplified placeholders; the feature files describe broader expected behaviors and are not all backed by step definitions yet.
+This is a local learning/demo application. Restaurant data is seeded in memory; session data is persisted locally as JSON. Payment, email/push notification, restaurant acknowledgement, and courier GPS are simulated domain behaviors rather than integrations with external providers. Delivery distance is checked when supplied with the address; the app does not geocode addresses or calculate live routes.

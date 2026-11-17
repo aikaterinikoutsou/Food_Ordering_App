@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from decimal import Decimal
 from typing import Dict, List, Optional
 
@@ -11,6 +11,7 @@ class Address:
     city: str
     postal_code: str
     country: str = "Spain"
+    distance_from_restaurant_km: Optional[float] = None
 
     def as_dict(self) -> dict:
         return {
@@ -73,7 +74,16 @@ class Restaurant:
         return None
 
     def is_menu_viewable(self) -> bool:
-        return self.is_open or True
+        return True
+
+    def menu_for_browsing(self) -> Dict[str, List[MenuItem]]:
+        return {
+            category: [
+                replace(item, available=item.available and self.is_open)
+                for item in items
+            ]
+            for category, items in self.menu.items()
+        }
 
 
 @dataclass
@@ -95,7 +105,11 @@ class Cart:
         if not item.available:
             raise ValueError(f"{item.name} is currently unavailable.")
 
-        if self.items and self.restaurant_name and self.restaurant_name != item.restaurant_name:
+        if (
+            self.items
+            and self.restaurant_name
+            and self.restaurant_name != item.restaurant_name
+        ):
             raise ValueError("Start a new cart to order from another restaurant.")
 
         self.restaurant_name = item.restaurant_name or self.restaurant_name
@@ -111,7 +125,6 @@ class Cart:
                 self.restaurant_name = None
             return
 
-        item = self.items[item_name].item
         self.items[item_name].quantity = quantity
 
     def remove_item(self, item_name: str) -> None:
@@ -152,6 +165,10 @@ class Order:
     status: str = "pending"
     payment_status: str = "pending"
     estimated_delivery_time_min: int = 30
+    confirmation_notification_sent: bool = False
+    restaurant_acknowledged: bool = True
+    support_or_cancellation_available: bool = False
+    delay_notification_sent: bool = False
 
     def __post_init__(self) -> None:
         self.total = self.subtotal + self.delivery_fee
@@ -164,7 +181,14 @@ class Order:
         return {
             "order_number": self.order_number,
             "restaurant_name": self.restaurant_name,
-            "items": [{"name": item.item.name, "quantity": item.quantity, "price": str(item.item.price)} for item in self.items],
+            "items": [
+                {
+                    "name": item.item.name,
+                    "quantity": item.quantity,
+                    "price": str(item.item.price),
+                }
+                for item in self.items
+            ],
             "address": self.address.as_dict(),
             "subtotal": str(self.subtotal),
             "delivery_fee": str(self.delivery_fee),
