@@ -24,6 +24,7 @@ def _add_dish(context, dish, quantity=1):
     for _ in range(quantity):
         context.app.add_to_cart(dish)
         _record_cart_total(context)
+        _record_cart_total(context)
 
 
 def _record_cart_total(context):
