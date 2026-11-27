@@ -12,36 +12,247 @@ Feature: Cart management # validation/features/cart_management.feature:2
 
   @TC-010 @US-005 @negative @high
   Scenario: Attempt to add an unavailable item                       # validation/features/cart_management.feature:15
-    Given the meal "Salmon Roll" is marked unavailable               # None
-    When the customer attempts to add "Salmon Roll" to the cart      # None
-    Then the item is not added to the cart                           # None
-    And the customer sees a message that it is currently unavailable # None
+    Given the meal "Salmon Roll" is marked unavailable               # validation/features/steps/application_steps.py:46
+    When the customer attempts to add "Salmon Roll" to the cart      # validation/features/steps/application_steps.py:54
+    Then the item is not added to the cart                           # validation/features/steps/application_steps.py:73
+    And the customer sees a message that it is currently unavailable # validation/features/steps/application_steps.py:78
 
   @TC-011 @US-007 @positive @medium
   Scenario: Increase and decrease item quantity                        # validation/features/cart_management.feature:22
-    Given "Salmon Roll" is already in the cart with quantity 1         # None
-    When the customer increases the quantity by 2                      # None
-    And the customer decreases the quantity by 1                       # None
-    Then the cart shows "Salmon Roll" with quantity 2                  # None
-    And the cart total is recalculated automatically after each change # None
+    Given "Salmon Roll" is already in the cart with quantity 1         # validation/features/steps/application_steps.py:83
+    When the customer increases the quantity by 2                      # validation/features/steps/application_steps.py:93
+    And the customer decreases the quantity by 1                       # validation/features/steps/application_steps.py:101
+    Then the cart shows "Salmon Roll" with quantity 2                  # validation/features/steps/application_steps.py:109
+    And the cart total is recalculated automatically after each change # validation/features/steps/application_steps.py:114
 
   @TC-012 @US-006 @edge @medium
   Scenario: Decrease quantity to zero removes the item               # validation/features/cart_management.feature:30
-    Given "Salmon Roll" is the only item in the cart with quantity 1 # None
-    When the customer decreases the quantity to 0                    # None
-    Then "Salmon Roll" is removed from the cart entirely             # None
-    And the cart total updates to zero                               # None
+    Given "Salmon Roll" is the only item in the cart with quantity 1 # validation/features/steps/application_steps.py:122
+    When the customer decreases the quantity to 0                    # validation/features/steps/application_steps.py:127
+    Then "Salmon Roll" is removed from the cart entirely             # validation/features/steps/application_steps.py:132
+    And the cart total updates to zero                               # validation/features/steps/application_steps.py:137
 
   @TC-013 @US-005 @positive @high
   Scenario: Cart persists after a page reload                               # validation/features/cart_management.feature:37
-    Given the customer has added an item to the cart in the current session # None
-    When the customer reloads the page                                      # None
-    Then the cart still shows the same items and quantities                 # None
+    Given the customer has added an item to the cart in the current session # validation/features/steps/feature_steps.py:27
+    When the customer reloads the page                                      # validation/features/steps/feature_steps.py:36
+    Then the cart still shows the same items and quantities                 # validation/features/steps/feature_steps.py:45
 
   @TC-014 @negative @high
   Scenario: Reject an item from a different restaurant without changing the cart  # validation/features/cart_management.feature:43
-    Given the cart contains an item from "Sushi Place"                            # None
-    When the customer attempts to add an item from "Pizza Corner"                 # None
-    Then the app blocks the action                                                # None
-    And the existing cart remains unchanged                                       # None
+    Given the cart contains an item from "Sushi Place"                            # validation/features/steps/application_steps.py:142
+    When the customer attempts to add an item from "Pizza Corner"                 # validation/features/steps/application_steps.py:151
+    Then the app blocks the action                                                # validation/features/steps/application_steps.py:162
+    And the existing cart remains unchanged                                       # validation/features/steps/application_steps.py:168
+
+@FEAT-004
+Feature: Checkout # validation/features/checkout.feature:2
+  As a customer
+  I want to review my order and enter delivery details
+  So that I can confirm my order before paying
+  @TC-015 @positive @high
+  Scenario: Proceed to checkout with a valid cart           # validation/features/checkout.feature:8
+    Given the cart contains at least 1 available item       # validation/features/steps/application_steps.py:234
+    When the customer taps "Checkout"                       # validation/features/steps/application_steps.py:243
+    Then the order summary shows an itemized list           # validation/features/steps/application_steps.py:248
+    And the subtotal, delivery fee, and total are displayed # validation/features/steps/application_steps.py:254
+
+  @TC-016 @negative @medium
+  Scenario: Checkout with an empty cart                         # validation/features/checkout.feature:15
+    Given the cart is empty                                     # validation/features/steps/application_steps.py:261
+    When the customer navigates directly to the checkout screen # validation/features/steps/application_steps.py:267
+    Then checkout is rejected because the cart is empty         # validation/features/steps/application_steps.py:275
+
+  @TC-017 @positive @high
+  Scenario: Enter a valid delivery address                # validation/features/checkout.feature:21
+    Given the customer is on the checkout screen          # validation/features/steps/application_steps.py:281
+    When the customer enters a valid address and confirms # validation/features/steps/application_steps.py:286
+    Then the address is saved for this order              # validation/features/steps/application_steps.py:292
+
+  @TC-018 @negative @high
+  Scenario: Enter an address outside the delivery zone  # validation/features/checkout.feature:27
+    Given the restaurant's delivery radius is 5km       # validation/features/steps/application_steps.py:297
+    When the customer enters an address 10km away       # validation/features/steps/application_steps.py:304
+    Then checkout is blocked                            # validation/features/steps/application_steps.py:318
+    And the message "Outside delivery area" is shown    # validation/features/steps/application_steps.py:323
+
+  @TC-019 @edge @high
+  Scenario: Item becomes unavailable mid-checkout                      # validation/features/checkout.feature:34
+    Given the customer has reached the checkout screen                 # validation/features/steps/feature_steps.py:52
+    When an item in the cart is marked unavailable by the backend      # validation/features/steps/feature_steps.py:58
+    And the customer attempts to confirm the order                     # validation/features/steps/feature_steps.py:63
+    Then the customer is notified before payment                       # validation/features/steps/feature_steps.py:73
+    And the customer must remove or replace the item before proceeding # validation/features/steps/feature_steps.py:80
+
+@FEAT-007
+Feature: Delivery tracking # validation/features/delivery_tracking.feature:2
+  As a customer
+  I want to track my order
+  So that I know when it will arrive
+  @TC-028 @positive @high
+  Scenario: Retrieve the order status sequence                                    # validation/features/delivery_tracking.feature:8
+    Given the order has been confirmed and accepted by the restaurant             # validation/features/steps/application_steps.py:447
+    When the customer opens "Track order"                                         # validation/features/steps/application_steps.py:452
+    Then the status progresses through Preparing, Out for delivery, and Delivered # validation/features/steps/application_steps.py:457
+
+  @TC-029 @positive @medium
+  Scenario: Track an order after an app restart                   # validation/features/delivery_tracking.feature:14
+    Given an active order exists for the customer                 # validation/features/steps/feature_steps.py:194
+    When the customer closes and reopens the app                  # validation/features/steps/feature_steps.py:200
+    Then the tracking screen reloads the current status correctly # validation/features/steps/feature_steps.py:207
+    And the status is not a stale or cached value                 # validation/features/steps/feature_steps.py:216
+
+  @TC-030 @edge @low
+  Scenario: Tracking when courier location is temporarily unavailable  # validation/features/delivery_tracking.feature:21
+    Given the courier's GPS signal is lost temporarily                 # validation/features/steps/feature_steps.py:223
+    When the customer views the tracking screen                        # validation/features/steps/application_steps.py:472
+    Then the app shows the last known location with a timestamp        # validation/features/steps/feature_steps.py:229
+    And the map does not break or the app does not crash               # validation/features/steps/feature_steps.py:238
+
+  @TC-031 @negative @medium
+  Scenario: Order marked delivered without being tracked live  # validation/features/delivery_tracking.feature:28
+    Given the backend marks the order as "delivered" directly  # validation/features/steps/application_steps.py:466
+    When the customer views the tracking screen                # validation/features/steps/application_steps.py:472
+    Then the current order status is "Delivered"               # validation/features/steps/application_steps.py:478
+
+@FEAT-002
+Feature: Menu browsing # validation/features/menu_browsing.feature:2
+  As a customer
+  I want to view a restaurant's menu
+  So that I can select food to order
+  @TC-005 @positive @high
+  Scenario: View full menu for a restaurant                                # validation/features/menu_browsing.feature:8
+    Given the restaurant "Sushi Place" has an active menu with categories  # validation/features/steps/feature_steps.py:86
+    When the customer selects "Sushi Place" from the results               # validation/features/steps/feature_steps.py:93
+    Then the menu loads showing categories, item names, prices, and images # validation/features/steps/feature_steps.py:99
+
+  @TC-006 @edge @medium
+  Scenario: View menu for a currently closed restaurant  # validation/features/menu_browsing.feature:14
+    Given a restaurant is outside its operating hours    # validation/features/steps/feature_steps.py:109
+    When the customer selects that restaurant            # validation/features/steps/feature_steps.py:115
+    Then the menu is viewable in browse-only mode        # validation/features/steps/feature_steps.py:121
+    And items are marked unavailable                     # validation/features/steps/feature_steps.py:127
+    And "Add to cart" is not allowed on any item         # validation/features/steps/feature_steps.py:132
+
+  @TC-007 @negative @high
+  Scenario: Menu fails to load due to a backend timeout          # validation/features/menu_browsing.feature:22
+    Given the menu service is unreachable                        # validation/features/steps/feature_steps.py:144
+    When the customer selects a restaurant                       # validation/features/steps/feature_steps.py:149
+    Then the app shows a clear error message with a retry option # validation/features/steps/feature_steps.py:160
+    And the app does not hang indefinitely                       # validation/features/steps/feature_steps.py:166
+
+  @TC-008 @positive @low
+  Scenario: View item details with allergen info            # validation/features/menu_browsing.feature:29
+    Given the item "Salmon Roll" has allergen metadata set  # validation/features/steps/feature_steps.py:171
+    When the customer taps on "Salmon Roll"                 # validation/features/steps/feature_steps.py:178
+    Then the detail view shows the description and price    # validation/features/steps/feature_steps.py:183
+    And allergen tags such as "contains fish" are displayed # validation/features/steps/feature_steps.py:189
+
+@FEAT-006
+Feature: Order confirmation # validation/features/order_confirmation.feature:2
+  As a customer
+  I want to receive confirmation of my order
+  So that I know my order was accepted
+  @TC-025 @positive @high
+  Scenario: Confirmation shown after successful payment                 # validation/features/order_confirmation.feature:8
+    Given the customer's payment has just succeeded                     # validation/features/steps/application_steps.py:424
+    When the customer views the post-payment screen                     # validation/features/steps/application_steps.py:430
+    Then a confirmation screen shows the order number, items, and total # validation/features/steps/application_steps.py:435
+    And an estimated delivery time is displayed                         # validation/features/steps/application_steps.py:442
+
+  @TC-026 @positive @medium
+  Scenario: Confirmation notification is sent                            # validation/features/order_confirmation.feature:15
+    Given the order has been successfully placed                         # validation/features/steps/feature_steps.py:244
+    When up to 2 minutes have passed                                     # validation/features/steps/feature_steps.py:249
+    Then the customer receives a confirmation email or push notification # validation/features/steps/feature_steps.py:254
+
+  @TC-027 @edge @medium
+  Scenario: Restaurant does not acknowledge the order in time             # validation/features/order_confirmation.feature:21
+    Given the restaurant has not accepted the order within the SLA window # validation/features/steps/feature_steps.py:259
+    When the SLA window elapses                                           # validation/features/steps/feature_steps.py:265
+    Then the customer is notified of the delay                            # validation/features/steps/feature_steps.py:270
+    And a support or cancellation option is surfaced                      # validation/features/steps/feature_steps.py:275
+
+@FEAT-005
+Feature: Payment # validation/features/payment.feature:2
+  As a customer
+  I want to pay for my order
+  So that I can complete my purchase
+  @TC-020 @positive @high
+  Scenario: Pay successfully with a valid card                              # validation/features/payment.feature:8
+    Given the customer has entered valid card details with sufficient funds # validation/features/steps/application_steps.py:328
+    When the customer submits the payment                                   # validation/features/steps/application_steps.py:340
+    Then the payment is authorized                                          # validation/features/steps/application_steps.py:347
+    And the order moves to the "confirmed" state                            # validation/features/steps/application_steps.py:352
+
+  @TC-021 @negative @high
+  Scenario: Payment declined due to insufficient funds     # validation/features/payment.feature:15
+    Given the customer's card has insufficient funds       # validation/features/steps/application_steps.py:334
+    When the customer submits the payment                  # validation/features/steps/application_steps.py:340
+    Then the order is not created                          # validation/features/steps/application_steps.py:357
+    And the customer sees the decline reason               # validation/features/steps/application_steps.py:363
+    And the customer can retry with another payment method # validation/features/steps/application_steps.py:368
+
+  @TC-022 @negative @high
+  Scenario: Payment gateway timeout                                          # validation/features/payment.feature:23
+    Given the payment provider is simulating a timeout                       # validation/features/steps/feature_steps.py:280
+    When the customer submits the payment                                    # validation/features/steps/application_steps.py:340
+    Then the system does not double-charge the customer on retry             # validation/features/steps/feature_steps.py:289
+    And the customer sees a "checking payment status" message until resolved # validation/features/steps/feature_steps.py:299
+
+  @TC-023 @negative @medium
+  Scenario: Invalid card number is rejected by the payment service  # validation/features/payment.feature:30
+    When the customer enters a malformed card number                # validation/features/steps/application_steps.py:374
+    And the customer submits the payment form                       # validation/features/steps/application_steps.py:380
+    Then the payment is rejected with an invalid-card status        # validation/features/steps/application_steps.py:385
+    And the order remains unconfirmed                               # validation/features/steps/application_steps.py:391
+
+  @TC-024 @edge @high
+  Scenario: Duplicate submission from double-clicking Pay                  # validation/features/payment.feature:37
+    Given the customer is on the payment screen with valid details entered # validation/features/steps/application_steps.py:397
+    When the customer clicks "Pay" twice in quick succession               # validation/features/steps/application_steps.py:402
+    Then only one charge is created                                        # validation/features/steps/application_steps.py:412
+    And the second click is debounced or ignored                           # validation/features/steps/application_steps.py:419
+
+@FEAT-001
+Feature: Restaurant discovery # validation/features/restaurant_discovery.feature:2
+  As a customer
+  I want to search for nearby restaurants
+  So that I can choose where to order from
+  @FEAT-001
+  Feature: Restaurant discovery  # validation/features/restaurant_discovery.feature:2
+
+  @TC-001 @positive @high
+  Scenario: Search returns nearby restaurants                       # validation/features/restaurant_discovery.feature:11
+    Given the customer has opened the app                           # validation/features/steps/application_steps.py:41
+    Given the customer has granted location permissions             # validation/features/steps/application_steps.py:173
+    And the demo restaurants are available                          # validation/features/steps/application_steps.py:178
+    When the customer performs a search with the default location   # validation/features/steps/application_steps.py:183
+    Then the results list shows restaurants sorted by distance      # validation/features/steps/application_steps.py:188
+    And each result has a name, rating, and estimated delivery time # validation/features/steps/application_steps.py:194
+
+  @TC-002 @edge @medium
+  Scenario: Search with no results nearby                              # validation/features/restaurant_discovery.feature:19
+    Given the customer has opened the app                              # validation/features/steps/application_steps.py:41
+    Given no restaurants are within 50km of the customer location      # validation/features/steps/feature_steps.py:304
+    When the customer performs a search                                # validation/features/steps/feature_steps.py:310
+    Then an empty-state message "No restaurants found nearby" is shown # validation/features/steps/feature_steps.py:315
+    And no error or blank screen is displayed                          # validation/features/steps/feature_steps.py:321
+
+  @TC-003 @negative @high
+  Scenario: Search with location services disabled                  # validation/features/restaurant_discovery.feature:26
+    Given the customer has opened the app                           # validation/features/steps/application_steps.py:41
+    Given the customer has denied location permission               # validation/features/steps/feature_steps.py:326
+    When the customer attempts a search                             # validation/features/steps/feature_steps.py:331
+    Then the app prompts for a manual address or to enable location # validation/features/steps/feature_steps.py:339
+    And the app does not crash                                      # validation/features/steps/feature_steps.py:344
+
+  @TC-004 @positive @medium
+  Scenario: Filter restaurants by cuisine type            # validation/features/restaurant_discovery.feature:33
+    Given the customer has opened the app                 # validation/features/steps/application_steps.py:41
+    Given search results include at least 2 cuisine types # validation/features/steps/application_steps.py:205
+    When the customer applies the "Italian" filter        # validation/features/steps/application_steps.py:211
+    Then only restaurants tagged "Italian" are shown      # validation/features/steps/application_steps.py:216
+    When the customer clears the filter                   # validation/features/steps/application_steps.py:224
+    Then all restaurants are shown again                  # validation/features/steps/application_steps.py:229
 

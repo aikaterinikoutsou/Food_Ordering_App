@@ -72,6 +72,9 @@ python -m ruff check .
 python -m ruff format --check .
 ```
 
+GitHub Actions runs pytest, all Behave feature suites, and both Ruff checks for
+every pull request and every push to `main`.
+
 Gherkin scenarios and their Behave step definitions are in `validation/features`. Run all seven feature suites with:
 
 ```powershell
